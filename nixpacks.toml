@@ -10,9 +10,8 @@ cmds = [
 
 [phases.build]
 cmds = [
-  ". /opt/venv/bin/activate && python manage.py collectstatic --no-input --clear",
-  ". /opt/venv/bin/activate && python manage.py migrate --no-input"
+  ". /opt/venv/bin/activate && python manage.py collectstatic --no-input --clear"
 ]
 
 [start]
-cmd = ". /opt/venv/bin/activate && python create_superuser.py && gunicorn config.wsgi --bind 0.0.0.0:$PORT --log-file -"
+cmd = ". /opt/venv/bin/activate && python manage.py migrate --no-input && python create_superuser.py && gunicorn config.wsgi --bind 0.0.0.0:$PORT --log-file -"
