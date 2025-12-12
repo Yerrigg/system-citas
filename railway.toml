@@ -1,8 +1,5 @@
 [build]
 builder = "nixpacks"
 
-[build.nixpacksPlan.phases.build]
-cmds = ["bash railway_build.sh"]
-
 [deploy]
-startCommand = "gunicorn config.wsgi --bind 0.0.0.0:$PORT --log-file -"
+startCommand = "gunicorn config.wsgi --log-file -"
