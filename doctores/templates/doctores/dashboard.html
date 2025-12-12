@@ -1,0 +1,176 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Doctor - System Citas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-user-md"></i> Dashboard - Dr. {{ doctor.usuario.get_full_name }}</h2>
+            <p class="text-muted">
+                {% for esp in doctor.especialidades.all %}
+                    <span class="badge bg-primary">{{ esp.nombre }}</span>
+                {% endfor %}
+            </p>
+        </div>
+    </div>
+    
+    <!-- Estadísticas -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card border-primary shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-calendar-day fa-3x text-primary mb-2"></i>
+                    <h3 class="mb-0">{{ citas_hoy.count }}</h3>
+                    <p class="text-muted mb-0">Citas Hoy</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-success shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-3x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ citas_completadas }}</h3>
+                    <p class="text-muted mb-0">Completadas (mes)</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-3x text-warning mb-2"></i>
+                    <h3 class="mb-0">{{ citas_pendientes }}</h3>
+                    <p class="text-muted mb-0">Pendientes</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-3">
+            <div class="card border-info shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-info mb-2"></i>
+                    <h3 class="mb-0">{{ pacientes_mes }}</h3>
+                    <p class="text-muted mb-0">Pacientes (mes)</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Citas de hoy -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-day"></i> Citas de Hoy</h5>
+                </div>
+                <div class="card-body">
+                    {% if citas_hoy %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Hora</th>
+                                    <th>Paciente</th>
+                                    <th>Tipo</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for cita in citas_hoy %}
+                                <tr>
+                                    <td><strong>{{ cita.hora_inicio|time:"H:i" }}</strong></td>
+                                    <td>{{ cita.paciente.usuario.get_full_name }}</td>
+                                    <td>{{ cita.get_tipo_display }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if cita.estado == 'pendiente' %}bg-warning
+                                            {% elif cita.estado == 'confirmada' %}bg-success
+                                            {% elif cita.estado == 'en_curso' %}bg-info
+                                            {% endif %}">
+                                            {{ cita.get_estado_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if cita.estado == 'pendiente' %}
+                                        <a href="{% url 'confirmar_cita' cita.id %}" class="btn btn-sm btn-success" title="Confirmar">
+                                            <i class="fas fa-check"></i>
+                                        </a>
+                                        {% endif %}
+                                        
+                                        {% if cita.estado in 'confirmada,en_curso' %}
+                                        <a href="{% url 'atender_cita' cita.id %}" class="btn btn-sm btn-primary" title="Atender">
+                                            <i class="fas fa-stethoscope"></i>
+                                        </a>
+                                        {% endif %}
+                                        
+                                        <a href="{% url 'detalle_cita' cita.id %}" class="btn btn-sm btn-info" title="Ver">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        
+                                        <a href="{% url 'marcar_no_asistio' cita.id %}" class="btn btn-sm btn-danger" title="No asistió"
+                                           onclick="return confirm('¿Marcar como no asistió?')">
+                                            <i class="fas fa-times"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">
+                        <i class="fas fa-info-circle"></i> No tienes citas programadas para hoy.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Próximas citas -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-calendar-alt"></i> Próximas Citas (7 días)</h5>
+                </div>
+                <div class="card-body">
+                    {% if proximas_citas %}
+                    <div class="list-group">
+                        {% for cita in proximas_citas %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">
+                                    {{ cita.paciente.usuario.get_full_name }}
+                                    <span class="badge 
+                                        {% if cita.estado == 'pendiente' %}bg-warning
+                                        {% elif cita.estado == 'confirmada' %}bg-success
+                                        {% endif %}">
+                                        {{ cita.get_estado_display }}
+                                    </span>
+                                </h6>
+                                <small>{{ cita.fecha|date:"d/m/Y" }} - {{ cita.hora_inicio|time:"H:i" }}</small>
+                            </div>
+                            <p class="mb-1"><small class="text-muted">{{ cita.motivo|truncatewords:15 }}</small></p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{% url 'agenda_doctor' %}" class="btn btn-outline-primary">
+                            Ver Agenda Completa <i class="fas fa-arrow-right"></i>
+                        </a>
+                    </div>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">
+                        <i class="fas fa-info-circle"></i> No tienes citas próximas.
+                    </p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

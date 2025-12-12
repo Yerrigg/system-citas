@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Pacientes - System Citas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-users"></i> Mis Pacientes</h2>
+            <p class="text-muted">Pacientes que has atendido</p>
+        </div>
+    </div>
+    
+    {% if pacientes_data %}
+    <div class="row g-4">
+        {% for data in pacientes_data %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm h-100 hover-card">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if data.paciente.usuario.foto %}
+                        <img src="{{ data.paciente.usuario.foto.url }}" class="rounded-circle" 
+                             width="80" height="80" alt="{{ data.paciente.usuario.get_full_name }}">
+                        {% else %}
+                        <i class="fas fa-user-circle fa-4x text-secondary"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title text-center">
+                        {{ data.paciente.usuario.get_full_name }}
+                    </h5>
+                    
+                    <hr>
+                    
+                    <p class="mb-2">
+                        <i class="fas fa-id-card text-primary"></i> 
+                        <strong>DNI:</strong> {{ data.paciente.dni }}
+                    </p>
+                    
+                    <p class="mb-2">
+                        <i class="fas fa-phone text-success"></i> 
+                        <strong>Teléfono:</strong> {{ data.paciente.usuario.telefono|default:"No registrado" }}
+                    </p>
+                    
+                    <p class="mb-2">
+                        <i class="fas fa-envelope text-info"></i> 
+                        <strong>Email:</strong><br>
+                        <small>{{ data.paciente.usuario.email }}</small>
+                    </p>
+                    
+                    {% if data.paciente.grupo_sanguineo %}
+                    <p class="mb-2">
+                        <i class="fas fa-tint text-danger"></i> 
+                        <strong>Grupo:</strong> {{ data.paciente.grupo_sanguineo }}
+                    </p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-flex justify-content-between mb-3">
+                        <div class="text-center">
+                            <h4 class="text-primary mb-0">{{ data.total_citas }}</h4>
+                            <small class="text-muted">Citas Total</small>
+                        </div>
+                        <div class="text-center">
+                            <h6 class="text-success mb-0">
+                                {% if data.ultima_cita %}
+                                {{ data.ultima_cita.fecha|date:"d/m/Y" }}
+                                {% else %}
+                                -
+                                {% endif %}
+                            </h6>
+                            <small class="text-muted">Última Cita</small>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid">
+                        <a href="{% url 'historial_paciente' data.paciente.id %}" class="btn btn-primary">
+                            <i class="fas fa-history"></i> Ver Historial
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <i class="fas fa-info-circle"></i> Aún no has atendido pacientes.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

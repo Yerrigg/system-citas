@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+
+{% block title %}Buscar Doctores - System Citas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2><i class="fas fa-search"></i> Buscar Doctores</h2>
+            <p class="text-muted">Encuentra al especialista que necesitas</p>
+        </div>
+    </div>
+    
+    <!-- Formulario de búsqueda -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" action="{% url 'buscar_doctores' %}">
+                <div class="row g-3">
+                    <div class="col-md-5">
+                        <label for="q" class="form-label">Buscar por nombre o licencia</label>
+                        <input type="text" class="form-control" id="q" name="q" 
+                               value="{{ query }}" placeholder="Ej: Juan Pérez o CMP-12345">
+                    </div>
+                    
+                    <div class="col-md-5">
+                        <label for="especialidad" class="form-label">Especialidad</label>
+                        <select class="form-select" id="especialidad" name="especialidad">
+                            <option value="">Todas las especialidades</option>
+                            {% for esp in especialidades %}
+                            <option value="{{ esp.id }}" {% if especialidad_id == esp.id|stringformat:"s" %}selected{% endif %}>
+                                {{ esp.nombre }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="fas fa-search"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Resultados -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <h5>Resultados: {{ doctores.count }} doctor(es) encontrado(s)</h5>
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for doctor in doctores %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm hover-card">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if doctor.usuario.foto %}
+                        <img src="{{ doctor.usuario.foto.url }}" class="rounded-circle" width="100" height="100" alt="{{ doctor.usuario.get_full_name }}">
+                        {% else %}
+                        <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title text-center">
+                        Dr. {{ doctor.usuario.get_full_name }}
+                    </h5>
+                    
+                    <p class="text-center text-muted mb-3">
+                        <small>
+                            {% for esp in doctor.especialidades.all %}
+                                <span class="badge bg-primary">{{ esp.nombre }}</span>
+                            {% endfor %}
+                        </small>
+                    </p>
+                    
+                    {% if doctor.biografia %}
+                    <p class="card-text text-muted small">{{ doctor.biografia|truncatewords:20 }}</p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <p class="mb-2">
+                            <i class="fas fa-certificate text-warning"></i> 
+                            <small>Licencia: {{ doctor.licencia_medica }}</small>
+                        </p>
+                        <p class="mb-3">
+                            <i class="fas fa-briefcase text-info"></i> 
+                            <small>{{ doctor.anos_experiencia }} años de experiencia</small>
+                        </p>
+                        
+                        <a href="{% url 'disponibilidad_doctor' doctor.id %}" class="btn btn-success">
+                            <i class="fas fa-calendar-check"></i> Ver Disponibilidad
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <i class="fas fa-info-circle fa-2x mb-3"></i>
+                <p class="mb-0">No se encontraron doctores con los criterios de búsqueda.</p>
+                <a href="{% url 'buscar_doctores' %}" class="btn btn-primary mt-3">
+                    <i class="fas fa-redo"></i> Limpiar Búsqueda
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

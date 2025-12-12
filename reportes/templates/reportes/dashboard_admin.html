@@ -1,0 +1,296 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard Admin - System Citas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-chart-line"></i> Dashboard Administrativo</h2>
+            <p class="text-muted">Panel de control y estadísticas del sistema</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'reporte_citas' %}" class="btn btn-primary">
+                <i class="fas fa-file-alt"></i> Reportes Detallados
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filtro de fechas -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-4">
+                    <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                           value="{{ fecha_inicio|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                           value="{{ fecha_fin|date:'Y-m-d' }}">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">&nbsp;</label>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-filter"></i> Filtrar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Estadísticas principales -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-primary shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Pacientes</h6>
+                            <h2 class="mb-0 text-primary">{{ total_pacientes }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-users fa-3x text-primary opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-success shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Doctores</h6>
+                            <h2 class="mb-0 text-success">{{ total_doctores }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-user-md fa-3x text-success opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-info shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Especialidades</h6>
+                            <h2 class="mb-0 text-info">{{ total_especialidades }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-stethoscope fa-3x text-info opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-muted mb-1">Total Citas</h6>
+                            <h2 class="mb-0 text-warning">{{ total_citas }}</h2>
+                        </div>
+                        <div>
+                            <i class="fas fa-calendar-check fa-3x text-warning opacity-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Estadísticas de citas -->
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="mb-0">{{ citas_completadas }}</h3>
+                    <p class="text-muted mb-0">Completadas</p>
+                    <small class="text-success">{{ tasa_completadas }}%</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="mb-0">{{ citas_pendientes }}</h3>
+                    <p class="text-muted mb-0">Pendientes</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-times-circle fa-2x text-danger mb-2"></i>
+                    <h3 class="mb-0">{{ citas_canceladas }}</h3>
+                    <p class="text-muted mb-0">Canceladas</p>
+                    <small class="text-danger">{{ tasa_canceladas }}%</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-slash fa-2x text-dark mb-2"></i>
+                    <h3 class="mb-0">{{ citas_no_asistio }}</h3>
+                    <p class="text-muted mb-0">No Asistió</p>
+                    <small class="text-dark">{{ tasa_no_asistio }}%</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Gráficos -->
+    <div class="row g-4 mb-4">
+        <!-- Citas por especialidad -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Top 5 Especialidades</h5>
+                </div>
+                <div class="card-body">
+                    {% if citas_por_especialidad %}
+                    <table class="table table-sm">
+                        <tbody>
+                            {% for item in citas_por_especialidad %}
+                            <tr>
+                                <td><strong>{{ item.nombre }}</strong></td>
+                                <td class="text-end">{{ item.total }} citas</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No hay datos disponibles</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Doctores más solicitados -->
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Doctores Más Solicitados</h5>
+                </div>
+                <div class="card-body">
+                    {% if doctores_mas_solicitados %}
+                    <table class="table table-sm">
+                        <tbody>
+                            {% for item in doctores_mas_solicitados %}
+                            <tr>
+                                <td><strong>{{ item.nombre }}</strong></td>
+                                <td class="text-end">{{ item.total }} citas</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No hay datos disponibles</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tendencias -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0"><i class="fas fa-chart-line"></i> Citas por Mes</h5>
+                </div>
+                <div class="card-body">
+                    {% if citas_por_mes %}
+                    <table class="table table-sm">
+                        <tbody>
+                            {% for item in citas_por_mes %}
+                            <tr>
+                                <td><strong>{{ item.mes|date:"F Y" }}</strong></td>
+                                <td class="text-end">{{ item.total }} citas</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No hay datos disponibles</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-clock"></i> Horarios Pico</h5>
+                </div>
+                <div class="card-body">
+                    {% if horarios_pico %}
+                    <table class="table table-sm">
+                        <tbody>
+                            {% for horario in horarios_pico %}
+                            <tr>
+                                <td><strong>{{ horario.hora_inicio|time:"H:i" }}</strong></td>
+                                <td class="text-end">{{ horario.total }} citas</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <p class="text-muted text-center mb-0">No hay datos disponibles</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Enlaces a reportes detallados -->
+    <div class="row g-4">
+        <div class="col-md-4">
+            <div class="card shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-file-alt fa-3x text-primary mb-3"></i>
+                    <h5>Reporte de Citas</h5>
+                    <p class="text-muted">Ver listado completo de citas</p>
+                    <a href="{% url 'reporte_citas' %}" class="btn btn-primary">Ver Reporte</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-user-md fa-3x text-success mb-3"></i>
+                    <h5>Reporte de Doctores</h5>
+                    <p class="text-muted">Rendimiento de doctores</p>
+                    <a href="{% url 'reporte_doctores' %}" class="btn btn-success">Ver Reporte</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card shadow-sm hover-card">
+                <div class="card-body text-center">
+                    <i class="fas fa-users fa-3x text-info mb-3"></i>
+                    <h5>Reporte de Pacientes</h5>
+                    <p class="text-muted">Información de pacientes</p>
+                    <a href="{% url 'reporte_pacientes' %}" class="btn btn-info">Ver Reporte</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

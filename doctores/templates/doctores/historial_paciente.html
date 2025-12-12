@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Historial - {{ paciente.usuario.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Información del paciente -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0"><i class="fas fa-user"></i> {{ paciente.usuario.get_full_name }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong><i class="fas fa-id-card"></i> DNI:</strong> {{ paciente.dni }}</p>
+                    <p><strong><i class="fas fa-envelope"></i> Email:</strong> {{ paciente.usuario.email }}</p>
+                    <p><strong><i class="fas fa-phone"></i> Teléfono:</strong> {{ paciente.usuario.telefono|default:"No registrado" }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong><i class="fas fa-birthday-cake"></i> Fecha Nacimiento:</strong> 
+                        {{ paciente.usuario.fecha_nacimiento|date:"d/m/Y"|default:"No registrada" }}
+                    </p>
+                    <p><strong><i class="fas fa-tint"></i> Grupo Sanguíneo:</strong> 
+                        {{ paciente.grupo_sanguineo|default:"No registrado" }}
+                    </p>
+                    <p><strong><i class="fas fa-allergies"></i> Alergias:</strong> 
+                        {{ paciente.alergias|default:"Ninguna registrada" }}
+                    </p>
+                </div>
+            </div>
+            
+            {% if paciente.contacto_emergencia %}
+            <hr>
+            <div class="alert alert-warning mb-0">
+                <strong><i class="fas fa-exclamation-triangle"></i> Contacto de Emergencia:</strong><br>
+                {{ paciente.contacto_emergencia }} - {{ paciente.telefono_emergencia }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Historial de citas -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-history"></i> Historial de Citas ({{ citas.count }})</h5>
+        </div>
+        <div class="card-body">
+            {% if citas %}
+            <div class="timeline">
+                {% for cita in citas %}
+                <div class="card mb-3 border-start border-4 
+                    {% if cita.estado == 'completada' %}border-success
+                    {% elif cita.estado == 'cancelada' %}border-danger
+                    {% elif cita.estado == 'no_asistio' %}border-dark
+                    {% else %}border-warning
+                    {% endif %}">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <h6 class="text-primary">{{ cita.fecha|date:"d/m/Y" }}</h6>
+                                <p class="mb-0"><small class="text-muted">{{ cita.hora_inicio|time:"H:i" }}</small></p>
+                                <span class="badge 
+                                    {% if cita.estado == 'completada' %}bg-success
+                                    {% elif cita.estado == 'cancelada' %}bg-danger
+                                    {% elif cita.estado == 'no_asistio' %}bg-dark
+                                    {% else %}bg-warning text-dark
+                                    {% endif %}">
+                                    {{ cita.get_estado_display }}
+                                </span>
+                            </div>
+                            <div class="col-md-9">
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-tag"></i> Tipo:</strong> {{ cita.get_tipo_display }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong><i class="fas fa-comment"></i> Motivo:</strong> {{ cita.motivo }}
+                                </p>
+                                
+                                {% if cita.diagnostico %}
+                                <div class="alert alert-info mb-2">
+                                    <strong><i class="fas fa-diagnoses"></i> Diagnóstico:</strong><br>
+                                    {{ cita.diagnostico }}
+                                </div>
+                                {% endif %}
+                                
+                                {% if cita.tratamiento %}
+                                <div class="alert alert-success mb-2">
+                                    <strong><i class="fas fa-pills"></i> Tratamiento:</strong><br>
+                                    {{ cita.tratamiento }}
+                                </div>
+                                {% endif %}
+                                
+                                {% if cita.notas %}
+                                <p class="mb-0">
+                                    <strong><i class="fas fa-notes-medical"></i> Notas:</strong> {{ cita.notas }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <p class="text-muted text-center mb-0">
+                <i class="fas fa-info-circle"></i> No hay citas registradas con este paciente.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="mt-4">
+        <a href="{% url 'mis_pacientes' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Volver a Mis Pacientes
+        </a>
+    </div>
+</div>
+{% endblock %}

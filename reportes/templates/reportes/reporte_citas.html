@@ -1,0 +1,148 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Citas - System Citas{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h2><i class="fas fa-file-alt"></i> Reporte de Citas</h2>
+            <p class="text-muted">Listado detallado de todas las citas</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'dashboard_admin' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Volver
+            </a>
+        </div>
+    </div>
+    
+    <!-- Filtros -->
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"><i class="fas fa-filter"></i> Filtros</h5>
+        </div>
+        <div class="card-body">
+            <form method="GET" class="row g-3">
+                <div class="col-md-3">
+                    <label for="fecha_inicio" class="form-label">Fecha Inicio</label>
+                    <input type="date" class="form-control" id="fecha_inicio" name="fecha_inicio" 
+                           value="{{ fecha_inicio }}">
+                </div>
+                
+                <div class="col-md-3">
+                    <label for="fecha_fin" class="form-label">Fecha Fin</label>
+                    <input type="date" class="form-control" id="fecha_fin" name="fecha_fin" 
+                           value="{{ fecha_fin }}">
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="especialidad" class="form-label">Especialidad</label>
+                    <select class="form-select" id="especialidad" name="especialidad">
+                        <option value="">Todas</option>
+                        {% for esp in especialidades %}
+                        <option value="{{ esp.id }}" {% if especialidad_id == esp.id|stringformat:"s" %}selected{% endif %}>
+                            {{ esp.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="doctor" class="form-label">Doctor</label>
+                    <select class="form-select" id="doctor" name="doctor">
+                        <option value="">Todos</option>
+                        {% for doc in doctores %}
+                        <option value="{{ doc.id }}" {% if doctor_id == doc.id|stringformat:"s" %}selected{% endif %}>
+                            Dr. {{ doc.usuario.get_full_name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label for="estado" class="form-label">Estado</label>
+                    <select class="form-select" id="estado" name="estado">
+                        <option value="">Todos</option>
+                        <option value="pendiente" {% if estado == 'pendiente' %}selected{% endif %}>Pendiente</option>
+                        <option value="confirmada" {% if estado == 'confirmada' %}selected{% endif %}>Confirmada</option>
+                        <option value="en_curso" {% if estado == 'en_curso' %}selected{% endif %}>En Curso</option>
+                        <option value="completada" {% if estado == 'completada' %}selected{% endif %}>Completada</option>
+                        <option value="cancelada" {% if estado == 'cancelada' %}selected{% endif %}>Cancelada</option>
+                        <option value="no_asistio" {% if estado == 'no_asistio' %}selected{% endif %}>No Asistió</option>
+                    </select>
+                </div>
+                
+                <div class="col-12">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Buscar
+                    </button>
+                    <a href="{% url 'reporte_citas' %}" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> Limpiar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Tabla de resultados -->
+    <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="fas fa-list"></i> Resultados ({{ citas.count }} citas)</h5>
+        </div>
+        <div class="card-body">
+            {% if citas %}
+            <div class="table-responsive">
+                <table class="table table-hover table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Fecha</th>
+                            <th>Hora</th>
+                            <th>Paciente</th>
+                            <th>DNI</th>
+                            <th>Doctor</th>
+                            <th>Especialidad</th>
+                            <th>Tipo</th>
+                            <th>Estado</th>
+                            <th>Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for cita in citas %}
+                        <tr>
+                            <td>{{ cita.fecha|date:"d/m/Y" }}</td>
+                            <td><strong>{{ cita.hora_inicio|time:"H:i" }}</strong></td>
+                            <td>{{ cita.paciente.usuario.get_full_name }}</td>
+                            <td>{{ cita.paciente.dni }}</td>
+                            <td>Dr. {{ cita.doctor.usuario.get_full_name }}</td>
+                            <td>
+                                {% for esp in cita.doctor.especialidades.all %}
+                                    <span class="badge bg-primary">{{ esp.nombre }}</span>
+                                {% endfor %}
+                            </td>
+                            <td><span class="badge bg-secondary">{{ cita.get_tipo_display }}</span></td>
+                            <td>
+                                <span class="badge 
+                                    {% if cita.estado == 'pendiente' %}bg-warning text-dark
+                                    {% elif cita.estado == 'confirmada' %}bg-success
+                                    {% elif cita.estado == 'completada' %}bg-primary
+                                    {% elif cita.estado == 'cancelada' %}bg-danger
+                                    {% elif cita.estado == 'no_asistio' %}bg-dark
+                                    {% endif %}">
+                                    {{ cita.get_estado_display }}
+                                </span>
+                            </td>
+                            <td>{{ cita.motivo|truncatewords:8 }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <p class="text-muted text-center mb-0">
+                <i class="fas fa-info-circle"></i> No hay citas con los filtros seleccionados.
+            </p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

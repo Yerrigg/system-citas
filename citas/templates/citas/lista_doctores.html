@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Doctores - System Citas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row mb-4">
+        <div class="col-12">
+            {% if especialidad %}
+            <h2><i class="fas fa-user-md"></i> Doctores de {{ especialidad.nombre }}</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'lista_especialidades' %}">Especialidades</a></li>
+                    <li class="breadcrumb-item active">{{ especialidad.nombre }}</li>
+                </ol>
+            </nav>
+            {% else %}
+            <h2><i class="fas fa-user-md"></i> Todos los Doctores</h2>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="row g-4">
+        {% for doctor in doctores %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        {% if doctor.usuario.foto %}
+                        <img src="{{ doctor.usuario.foto.url }}" class="rounded-circle" width="100" height="100" alt="{{ doctor.usuario.get_full_name }}">
+                        {% else %}
+                        <i class="fas fa-user-circle fa-5x text-secondary"></i>
+                        {% endif %}
+                    </div>
+                    
+                    <h5 class="card-title text-center">
+                        Dr. {{ doctor.usuario.get_full_name }}
+                    </h5>
+                    
+                    <p class="text-center text-muted mb-3">
+                        <small>
+                            {% for esp in doctor.especialidades.all %}
+                                <span class="badge bg-primary">{{ esp.nombre }}</span>
+                            {% endfor %}
+                        </small>
+                    </p>
+                    
+                    {% if doctor.biografia %}
+                    <p class="card-text text-muted small">{{ doctor.biografia|truncatewords:20 }}</p>
+                    {% endif %}
+                    
+                    <hr>
+                    
+                    <div class="d-grid gap-2">
+                        <p class="mb-2">
+                            <i class="fas fa-certificate text-warning"></i> 
+                            <small>Licencia: {{ doctor.licencia_medica }}</small>
+                        </p>
+                        <p class="mb-3">
+                            <i class="fas fa-briefcase text-info"></i> 
+                            <small>{{ doctor.anos_experiencia }} años de experiencia</small>
+                        </p>
+                        
+                        <a href="{% url 'disponibilidad_doctor' doctor.id %}" class="btn btn-success">
+                            <i class="fas fa-calendar-check"></i> Ver Disponibilidad
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle"></i> No hay doctores disponibles en esta especialidad.
+            </div>
+            <a href="{% url 'lista_especialidades' %}" class="btn btn-primary">
+                <i class="fas fa-arrow-left"></i> Volver a Especialidades
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

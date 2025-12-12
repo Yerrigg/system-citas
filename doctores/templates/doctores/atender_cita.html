@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Atender Cita - System Citas{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0"><i class="fas fa-stethoscope"></i> Atender Cita</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Información del paciente -->
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-user"></i> Información del Paciente</h5>
+                        <hr>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Nombre:</strong> {{ cita.paciente.usuario.get_full_name }}</p>
+                                <p><strong>DNI:</strong> {{ cita.paciente.dni }}</p>
+                                <p><strong>Teléfono:</strong> {{ cita.paciente.usuario.telefono|default:"No registrado" }}</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Grupo Sanguíneo:</strong> {{ cita.paciente.grupo_sanguineo|default:"No registrado" }}</p>
+                                <p><strong>Alergias:</strong> {{ cita.paciente.alergias|default:"Ninguna registrada" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Información de la cita -->
+                    <div class="alert alert-secondary">
+                        <h5><i class="fas fa-calendar"></i> Información de la Cita</h5>
+                        <hr>
+                        <p><strong>Fecha:</strong> {{ cita.fecha|date:"d/m/Y" }}</p>
+                        <p><strong>Hora:</strong> {{ cita.hora_inicio|time:"H:i" }} - {{ cita.hora_fin|time:"H:i" }}</p>
+                        <p><strong>Tipo:</strong> {{ cita.get_tipo_display }}</p>
+                        <p><strong>Motivo de consulta:</strong> {{ cita.motivo }}</p>
+                    </div>
+                    
+                    <!-- Formulario de atención -->
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <div class="mb-3">
+                            <label for="notas" class="form-label">
+                                <i class="fas fa-notes-medical"></i> Notas de la Consulta
+                            </label>
+                            <textarea class="form-control" id="notas" name="notas" rows="4" 
+                                      placeholder="Observaciones generales de la consulta...">{{ cita.notas }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="diagnostico" class="form-label">
+                                <i class="fas fa-diagnoses"></i> Diagnóstico *
+                            </label>
+                            <textarea class="form-control" id="diagnostico" name="diagnostico" rows="4" 
+                                      placeholder="Diagnóstico médico..." required>{{ cita.diagnostico }}</textarea>
+                            <small class="text-muted">Describe el diagnóstico del paciente</small>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="tratamiento" class="form-label">
+                                <i class="fas fa-pills"></i> Tratamiento / Receta *
+                            </label>
+                            <textarea class="form-control" id="tratamiento" name="tratamiento" rows="5" 
+                                      placeholder="Tratamiento prescrito, medicamentos, dosis..." required>{{ cita.tratamiento }}</textarea>
+                            <small class="text-muted">Indica el tratamiento y medicamentos recetados</small>
+                        </div>
+                        
+                        <hr>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-check-circle"></i> Finalizar Consulta
+                            </button>
+                            <a href="{% url 'dashboard_doctor' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left"></i> Volver al Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Historial previo del paciente -->
+            <div class="card shadow mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0"><i class="fas fa-history"></i> Historial Previo con este Paciente</h5>
+                </div>
+                <div class="card-body">
+                    {% with citas_previas=cita.paciente.citas.all|dictsort:"fecha" %}
+                    {% if citas_previas %}
+                    <div class="list-group">
+                        {% for cita_prev in citas_previas %}
+                        {% if cita_prev.id != cita.id and cita_prev.estado == 'completada' %}
+                        <div class="list-group-item">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h6 class="mb-1">{{ cita_prev.fecha|date:"d/m/Y" }}</h6>
+                                <small>Dr. {{ cita_prev.doctor.usuario.get_full_name }}</small>
+                            </div>
+                            {% if cita_prev.diagnostico %}
+                            <p class="mb-1"><strong>Diagnóstico:</strong> {{ cita_prev.diagnostico }}</p>
+                            {% endif %}
+                            {% if cita_prev.tratamiento %}
+                            <p class="mb-0"><strong>Tratamiento:</strong> {{ cita_prev.tratamiento|truncatewords:20 }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        {% endfor %}
+                    </div>
+                    {% else %}
+                    <p class="text-muted mb-0">No hay historial previo con este paciente.</p>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
