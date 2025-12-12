@@ -1,1 +1,1 @@
-web: . /opt/venv/bin/activate && gunicorn config.wsgi --bind 0.0.0.0:$PORT --log-file -
+web: . /opt/venv/bin/activate && python manage.py migrate --no-input && python create_superuser.py && gunicorn config.wsgi --bind 0.0.0.0:$PORT --log-file -
